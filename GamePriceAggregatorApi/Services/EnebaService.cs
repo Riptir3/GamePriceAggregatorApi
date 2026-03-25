@@ -12,7 +12,7 @@ public class EnebaService : IGameService
     public EnebaService(HttpClient httpClient)
     {
         _httpClient = httpClient;
-        _httpClient.DefaultRequestHeaders.Add("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64)");
+        _httpClient.DefaultRequestHeaders.Add("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36");
     }
 
     public async Task<IEnumerable<GameResult>> SearchGamesAsync(string name)
@@ -26,23 +26,26 @@ public class EnebaService : IGameService
             var doc = new HtmlDocument();
             doc.LoadHtml(html);
 
-            var nodes = doc.DocumentNode.SelectNodes("//div[contains(@class, 'p6v9zv')]");
+            var nodes = doc.DocumentNode.SelectNodes("//div[contains(@class, 'pFaGHa')]");
 
             if (nodes != null)
             {
-                foreach (var node in nodes.Take(3))
+                foreach (var node in nodes.Take(5))
                 {
-                    var title = node.SelectSingleNode(".//span[contains(@class, 'Y0tVRB')]")?.InnerText;
-                    var price = node.SelectSingleNode(".//span[contains(@class, 'L3i1Po')]")?.InnerText;
-                    var link = node.SelectSingleNode(".//a")?.GetAttributeValue("href", "");
-                    var thumb = node.SelectSingleNode(".//img")?.GetAttributeValue("src", "");
+                    var title = node.SelectSingleNode(".//span[contains(@class, 'YLosEL')]")?.InnerText;
+
+                    var price = node.SelectSingleNode(".//span[contains(@class, 'L5ErLT')]")?.InnerText;
+
+                    var link = node.SelectSingleNode(".//a[contains(@class, 'oSVLlh')]")?.GetAttributeValue("href", "");
+
+                    var thumb = node.SelectSingleNode(".//img[contains(@class, 'LBwiWP')]")?.GetAttributeValue("src", "");
 
                     if (!string.IsNullOrEmpty(title) && !string.IsNullOrEmpty(price))
                     {
                         results.Add(new GameResult
                         {
-                            Title = WebUtility.HtmlDecode(title),
-                            Price = WebUtility.HtmlDecode(price).Replace("&nbsp;", " "),
+                            Title = WebUtility.HtmlDecode(title).Trim(),
+                            Price = WebUtility.HtmlDecode(price).Replace("&nbsp;", " ").Trim(),
                             Store = "Eneba",
                             ThumbnailUrl = thumb,
                             ExternalUrl = "https://www.eneba.com" + link
