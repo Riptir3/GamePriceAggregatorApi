@@ -1,0 +1,23 @@
+version: '3.8'
+
+services:
+  api:
+    build:
+      context: ./GamePriceAggregatorApi
+      dockerfile: Dockerfile
+    container_name: gameprice-api
+    ports:
+      - "8080:8080"
+    depends_on:
+      - flaresolverr
+    restart: unless-stopped
+
+  flaresolverr:
+    image: ghcr.io/flaresolverr/flaresolverr:latest
+    container_name: flaresolverr
+    ports:
+      - "8191:8191"
+    environment:
+      - LOG_LEVEL=info
+      - BROWSER_TIMEOUT=60000
+    restart: unless-stopped
