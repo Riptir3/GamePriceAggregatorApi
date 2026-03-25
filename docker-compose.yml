@@ -5,7 +5,7 @@ services:
     build:
       context: ./GamePriceAggregatorApi
       dockerfile: Dockerfile
-    container_name: gameprice-api
+    container_name: game-api-kontener
     ports:
       - "8080:8080"
     depends_on:
