@@ -14,14 +14,8 @@ namespace GamePriceAggregatorApi
             builder.Services.AddOpenApi();
             builder.Services.AddHttpClient();
 
-            //builder.Services.AddScoped<IGameService, SteamService>();
-            builder.Services.AddScoped<IGameService, EnebaService>();
-            //builder.Services.AddScoped<IGameService, CheapSharkService>();
-
-            builder.Services.AddHttpClient<EnebaService>(client =>
-            {
-                client.Timeout = TimeSpan.FromSeconds(50);
-            });
+            builder.Services.AddScoped<IGameService, SteamService>();
+            builder.Services.AddScoped<IGameService, CheapSharkService>();
 
             var app = builder.Build();
 
