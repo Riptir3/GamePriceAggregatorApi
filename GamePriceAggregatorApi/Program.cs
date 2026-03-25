@@ -1,3 +1,5 @@
+using GamePriceAggregatorApi.Interfaces;
+using GamePriceAggregatorApi.Services;
 using Scalar.AspNetCore;
 
 namespace GamePriceAggregatorApi
@@ -10,6 +12,9 @@ namespace GamePriceAggregatorApi
 
             builder.Services.AddControllers();
             builder.Services.AddOpenApi();
+            builder.Services.AddHttpClient();
+
+            builder.Services.AddScoped<IGameService, SteamService>();
 
             var app = builder.Build();
 
