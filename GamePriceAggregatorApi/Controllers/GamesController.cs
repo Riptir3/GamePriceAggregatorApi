@@ -18,6 +18,7 @@ public class GamesController : ControllerBase
     [HttpGet("search")]
     public async Task<IActionResult> Search([FromQuery] string name)
     {
+        Console.WriteLine($"Keresés indítása: {name}. Szervizek száma: {_services.Count()}");
         if (string.IsNullOrWhiteSpace(name)) return BadRequest("Search a valid game....");
 
         var searchTasks = _services.Select(s => s.SearchGamesAsync(name));
