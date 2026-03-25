@@ -48,7 +48,8 @@ public class CheapSharkService : IGameService
                     Title = title,
                     Price = price,
                     Store = storeName,
-                    ThumbnailUrl = thumb
+                    ThumbnailUrl = thumb,
+                    ExternalUrl = $"https://www.cheapshark.com/redirect?dealID={deal.GetProperty("dealID").GetString()}"
                 });
             }
 

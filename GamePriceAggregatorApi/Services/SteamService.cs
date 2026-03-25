@@ -44,7 +44,8 @@ public class SteamService : IGameService
                     Title = title,
                     Price = priceLabel,
                     Store = "Steam",
-                    ThumbnailUrl = $"https://store.steampowered.com/app/{id}"
+                    ThumbnailUrl = $"https://store.steampowered.com/app/{id}",
+                    ExternalUrl = $"https://store.steampowered.com/app/{id}"
                 });
             }
         }

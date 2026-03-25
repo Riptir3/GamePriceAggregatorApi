@@ -6,5 +6,6 @@
         public string Price { get; set; } = "N/A";
         public string Store { get; set; } = string.Empty;
         public string? ThumbnailUrl { get; set; }
+        public string? ExternalUrl { get; set; }
     }
 }
