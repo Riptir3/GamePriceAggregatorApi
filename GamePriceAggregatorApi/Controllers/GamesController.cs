@@ -22,7 +22,7 @@ public class GamesController : ControllerBase
         Console.WriteLine($"Search start for: {name}.");
         if (string.IsNullOrWhiteSpace(name)) return BadRequest("Search a valid game....");
 
-        var finalResults = await Task.WhenAll(_gameAggregatorService.GetCombinedResultsAsync(name));
+        var finalResults = await _gameAggregatorService.GetCombinedResultsAsync(name);
         return Ok(finalResults);
     }
 }
