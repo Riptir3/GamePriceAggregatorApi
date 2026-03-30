@@ -61,7 +61,7 @@ public class GameAggregatorService
 
     private decimal GetNumericPrice(GameResult game)
     {
-        if (game.Price == "Free") return 0;
+        if (game.Price == "Free / No price") return 0;
         var onlyDigits = new string(game.Price.Where(char.IsDigit).ToArray());
 
         if (!string.IsNullOrEmpty(onlyDigits))
