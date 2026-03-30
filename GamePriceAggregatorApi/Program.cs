@@ -12,11 +12,22 @@ namespace GamePriceAggregatorApi
 
             builder.Services.AddControllers();
             builder.Services.AddOpenApi();
-
             builder.Services.AddHttpClient();
 
-            builder.Services.AddScoped<IGameService, SteamService>();
-            builder.Services.AddScoped<IGameService, CheapSharkService>();
+            builder.Services.AddHttpClient<SteamService>(client => {
+                client.BaseAddress = new Uri("https://store.steampowered.com/");
+            });
+
+            builder.Services.AddHttpClient<CheapSharkService>(client => {
+                client.BaseAddress = new Uri("https://www.cheapshark.com/api/1.0/");
+                client.DefaultRequestHeaders.Add("User-Agent", "Mozilla/5.0...");
+            });
+
+            builder.Services.AddScoped<IGameService>(sp => sp.GetRequiredService<SteamService>());
+            builder.Services.AddScoped<IGameService>(sp => sp.GetRequiredService<CheapSharkService>());
+
+            builder.Services.AddScoped<GameAggregatorService>();
+            builder.Services.AddSingleton<ExchangeRateService>();
 
             var app = builder.Build();
 

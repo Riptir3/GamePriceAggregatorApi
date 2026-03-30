@@ -14,55 +14,33 @@ public class CheapSharkService : IGameService
         _httpClient = httpClient;
     }
 
-    public async Task<IEnumerable<GameResult>> SearchGamesAsync(string exactTitle)
+    public async Task<IEnumerable<GameResult>> SearchGamesAsync(string searchTerm)
     {
-        if (string.IsNullOrWhiteSpace(exactTitle))
-            return Enumerable.Empty<GameResult>();
+        var url = $"deals?title={Uri.EscapeDataString(searchTerm)}&storeID=7,25&nonSpecific=1";
 
-        var searchUrl = $"https://www.cheapshark.com/api/1.0/deals?" +
-                        $"title={Uri.EscapeDataString(exactTitle)}" +
-                        //$"&exact=1" +                    
-                        $"&storeID=7,25" +               
-                        $"&upperPrice=60";
-        Console.WriteLine(searchUrl);
-        try
+        var response = await _httpClient.GetAsync(url);
+        if (!response.IsSuccessStatusCode) return Enumerable.Empty<GameResult>();
+
+        var content = await response.Content.ReadAsStringAsync();
+        using var doc = JsonDocument.Parse(content);
+        var results = new List<GameResult>();
+
+        foreach (var item in doc.RootElement.EnumerateArray())
         {
-            var response = await _httpClient.GetAsync(searchUrl);
-            response.EnsureSuccessStatusCode();
-            var content = await response.Content.ReadAsStringAsync();
+            var title = item.GetProperty("title").GetString() ?? "";
 
-            using var doc = JsonDocument.Parse(content);
-            var results = new List<GameResult>();
+            if (title.Contains("Add-On", StringComparison.OrdinalIgnoreCase)) continue;
 
-            foreach (var deal in doc.RootElement.EnumerateArray())
+            results.Add(new GameResult
             {
-                var title = deal.GetProperty("title").GetString() ?? "";
-                var storeId = deal.GetProperty("storeID").GetString() ?? "";
-                var price = deal.GetProperty("salePrice").GetString() ?? "0";
-                var thumb = deal.GetProperty("thumb").GetString() ?? "";
-
-                var storeName = storeId == "7" ? "GOG" : "Epic Games";
-
-                results.Add(new GameResult
-                {
-                    Title = title,
-                    Price = price,
-                    Store = storeName,
-                    ThumbnailUrl = thumb,
-                    ExternalUrl = $"https://www.cheapshark.com/redirect?dealID={deal.GetProperty("dealID").GetString()}"
-                });
-            }
-
-            return results
-                .GroupBy(r => r.Store)                    
-                .Select(g => g.OrderBy(r => decimal.TryParse(r.Price, out var p) ? p : 999).First())
-                .OrderBy(r => decimal.TryParse(r.Price, out var p) ? p : 999)
-                .ToList();
+                Title = title,
+                Price = item.GetProperty("salePrice").GetString() ?? "0.00",
+                Store = item.GetProperty("storeID").GetString() == "7" ? "GOG" : "Epic Games",
+                ThumbnailUrl = item.GetProperty("thumb").GetString() ?? "",
+                ExternalUrl = $"https://www.cheapshark.com/redirect?dealID={item.GetProperty("dealID").GetString()}"
+            });
         }
-        catch
-        {
-            return Enumerable.Empty<GameResult>();
-        }
+        return results;
     }
 
 }

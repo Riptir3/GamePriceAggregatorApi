@@ -1,5 +1,6 @@
 ﻿using GamePriceAggregatorApi.Interfaces;
 using GamePriceAggregatorApi.Models;
+using GamePriceAggregatorApi.Services;
 using Microsoft.AspNetCore.Mvc;
 
 namespace GamePriceAggregatorApi.Controllers;
@@ -8,26 +9,20 @@ namespace GamePriceAggregatorApi.Controllers;
 [Route("api/[controller]")]
 public class GamesController : ControllerBase
 {
-    private readonly IEnumerable<IGameService> _services;
+    private readonly GameAggregatorService _gameAggregatorService;
 
-    public GamesController(IEnumerable<IGameService> services)
+    public GamesController(GameAggregatorService gameAggregatorService)
     {
-        _services = services;
+        _gameAggregatorService = gameAggregatorService;
     }
 
     [HttpGet("search")]
     public async Task<IActionResult> Search([FromQuery] string name)
     {
-        Console.WriteLine($"Keresés indítása: {name}. Szervizek száma: {_services.Count()}");
+        Console.WriteLine($"Search start for: {name}.");
         if (string.IsNullOrWhiteSpace(name)) return BadRequest("Search a valid game....");
 
-        var searchTasks = _services.Select(s => s.SearchGamesAsync(name));
-
-        var resultsArray = await Task.WhenAll(searchTasks);
-
-        var finalResults = resultsArray.SelectMany(r => r)
-                                       .OrderBy(g => g.Price); 
-
+        var finalResults = await Task.WhenAll(_gameAggregatorService.GetCombinedResultsAsync(name));
         return Ok(finalResults);
     }
 }

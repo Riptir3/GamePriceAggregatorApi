@@ -15,41 +15,42 @@ public class SteamService : IGameService
 
     public async Task<IEnumerable<GameResult>> SearchGamesAsync(string searchTerm)
     {
-        var url = $"https://store.steampowered.com/api/storesearch/?term={searchTerm}&l=hungarian&cc=HU";
+        var url = $"api/storesearch?term={Uri.EscapeDataString(searchTerm)}&l=hungarian&cc=HU";
 
         var response = await _httpClient.GetAsync(url);
+        Console.WriteLine(response);
         if (!response.IsSuccessStatusCode) return Enumerable.Empty<GameResult>();
 
         var content = await response.Content.ReadAsStringAsync();
         using var doc = JsonDocument.Parse(content);
-
         var results = new List<GameResult>();
 
         if (doc.RootElement.TryGetProperty("items", out var items))
         {
             foreach (var item in items.EnumerateArray())
             {
-                var title = item.GetProperty("name").GetString() ?? "Ismeretlen";
-                var id = item.GetProperty("id").GetInt32();
+                var name = item.GetProperty("name").GetString() ?? "";
+                if (name.Contains("DLC", StringComparison.OrdinalIgnoreCase) ||
+                    name.Contains("Expansion", StringComparison.OrdinalIgnoreCase)) continue;
 
-                string priceLabel = "Free / No price";
+                var id = item.GetProperty("id").GetInt32();
+                string priceLabel = "0.00";
+
                 if (item.TryGetProperty("price", out var priceInfo))
                 {
-                    var finalPrice = priceInfo.GetProperty("final").GetInt32() / 100.0;
-                    priceLabel = $"{finalPrice:N0}";
+                    priceLabel = (priceInfo.GetProperty("final").GetInt32() / 100.0).ToString("0.00").Replace(",", ".");
                 }
 
                 results.Add(new GameResult
                 {
-                    Title = title,
+                    Title = name,
                     Price = priceLabel,
                     Store = "Steam",
-                    ThumbnailUrl = $"https://store.steampowered.com/app/{id}",
+                    ThumbnailUrl = item.GetProperty("tiny_image").GetString() ?? "",
                     ExternalUrl = $"https://store.steampowered.com/app/{id}"
                 });
             }
         }
-
         return results;
     }
 }
