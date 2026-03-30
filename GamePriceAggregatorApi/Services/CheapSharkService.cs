@@ -24,7 +24,7 @@ public class CheapSharkService : IGameService
                         //$"&exact=1" +                    
                         $"&storeID=7,25" +               
                         $"&upperPrice=60";
-
+        Console.WriteLine(searchUrl);
         try
         {
             var response = await _httpClient.GetAsync(searchUrl);
