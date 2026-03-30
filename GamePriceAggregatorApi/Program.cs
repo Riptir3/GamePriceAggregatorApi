@@ -12,6 +12,7 @@ namespace GamePriceAggregatorApi
 
             builder.Services.AddControllers();
             builder.Services.AddOpenApi();
+
             builder.Services.AddHttpClient();
 
             builder.Services.AddScoped<IGameService, SteamService>();
@@ -25,11 +26,7 @@ namespace GamePriceAggregatorApi
                 app.MapScalarApiReference();
             }
 
-            app.UseHttpsRedirection();
-
             app.UseAuthorization();
-
-
             app.MapControllers();
 
             app.Run();
